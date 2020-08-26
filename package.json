@@ -1,0 +1,8 @@
+{
+  "name": "@freeasin/rtc-connect",
+  "version": "0.1.0",
+  "description": "Initiate and manage RTC connections",
+  "main": "index.js",
+  "author": "Dave Hermann",
+  "license": "MIT"
+}
