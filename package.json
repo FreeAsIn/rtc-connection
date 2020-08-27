@@ -3,6 +3,12 @@
   "version": "0.1.0",
   "description": "Initiate and manage RTC connections",
   "main": "index.js",
+  "scripts": {
+    "prebuild": "rm ./dist/*.*",
+    "build": "tsc",
+    "build:test": "snowpack build",
+    "test": "snowpack dev"
+  },
   "author": "Dave Hermann",
   "license": "MIT",
   "devDependencies": {

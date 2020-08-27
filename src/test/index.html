@@ -1,0 +1,42 @@
+<html>
+    <head>
+        <meta charset="utf8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+        <link rel="stylesheet" href="./main.css" />
+
+        <script type="module" src="./test.js"></script>
+    </head>
+    <body>
+        <div class="page_container column negotiator">
+            <div class="row">
+                <button type="button" class="generate_offer">Generate Offer</button>
+            </div>
+
+            <div class="row send_handshake inactive">
+                <div class="column">
+                    <label>This text is automatically copied to your clipboard. Paste into the Consume Offer box of another browser</label>
+                    <textarea class="negotiator"></textarea>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="column">
+                    <textarea class="remote_negotiation negotiator"></textarea>
+                    <button type="button" class="consume_offer">Consume Offer</button>
+                </div>
+            </div>
+        </div>
+        <div class="page_container column chat inactive">
+            <div class="row">
+                <div class="column">
+                    <textarea class="chat_entry"></textarea>
+                    <button type="button" class="send_chat">Send</button>
+                </div>
+            </div>
+            <div class="row">
+                <div class="column history"></div>
+            </div>
+        </div>
+    </body>
+</html>

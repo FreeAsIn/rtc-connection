@@ -1,0 +1,30 @@
+/* Layout */
+.arrange { justify-content: space-around; }
+.column { display: flex; flex-direction: column; }
+.grow { flex-grow: 1; }
+.page_container { display: flex; }
+.row { display: flex; flex-direction: row; margin-bottom: 1rem; }
+.row .row { margin-bottom: 0px; }
+.shrink { flex-grow: 0; }
+
+/* Common Elements */
+a { color: mediumblue; text-decoration: none; }
+a:hover { color: cornflowerblue; }
+
+h1 { margin: 0px; }
+hr { margin: 0.5em 0px; align-self: stretch; }
+.subtitle { color: grey; font-size: 1.25em; }
+
+/* Hide initially */
+.inactive { display: none; }
+
+textarea { min-height: 4rem; min-width: 20rem;}
+/* Negotiation requires a larger text field */
+textarea.negotiator { min-width: 50rem; min-height: 10rem; }
+
+/* Chat history should be reversed */
+div.column.history { flex-direction: column-reverse; width: 50vw; max-width: 600px; }
+div.column.history div.row.local { justify-content: flex-end; }
+div.column.history div.row.remote { justify-content: flex-start; color: dodgerblue; }
+div.column.history div.row > div { max-width: 60%; padding: 0.5rem; border: solid 1px black; border-radius: 4px; box-shadow: 3px 3px 5px; }
+div.column.history div.row.remote > div { border-color: darkslateblue; background-color: dodgerblue; color: white; box-shadow: 3px 3px 5px dodgerblue; }
