@@ -14,7 +14,15 @@ function supportsRTC(): boolean {
     return false;
 }
 
+function initiateRtcConnection(): Peer {
+    if (supportsRTC()) {
+        const connectToPeer: Peer = new Peer();
+
+        return connectToPeer;
+    } else
+        throw new Error(`WebRTC is not supported`);
+}
+
 export {
-    supportsRTC as RTCAvailable,
-    Peer,
+    initiateRtcConnection as ConfigureRTCSession,
 };

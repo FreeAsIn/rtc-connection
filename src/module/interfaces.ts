@@ -6,10 +6,8 @@ interface IPeerConstructor {
 }
 
 interface IRemoteHandshake {
-    /** RTC peer connection manager object */
-    peer: Peer;
     /** The offer or answer generated */
-    description?: RTCSessionDescription;
+    description?: RTCSessionDescriptionInit;
     /** The next ICE candidate */
     iceCandidate?: RTCIceCandidate;
 }
