@@ -1,0 +1,12 @@
+{
+    "compilerOptions": {
+        "declaration": true,
+        "module": "ES6",
+        "moduleResolution": "node",
+        "outDir": "./dist",
+        "target": "ES2017"
+    },
+    "include": [
+        "./src/module"
+    ]
+}
