@@ -22,20 +22,12 @@ class Peer {
     /** Unique ID for this connection */
     private connectionId: string = uuid();
 
-    /** Write logging to the console */
-    private logToConsole: boolean;
-
-    // Public properties
-
-    public generatedHandshakes: Array<string> = new Proxy([], {
+    /** Internal list of generated handshakes */
+    private generatedHandshakes: Array<string> = new Proxy([], {
         get: (target, property) => {
-            console.log("getting", {target, property});
-
             return target[property];
         },
         set: (target, property, value, receiver) => {
-            console.log("setting", { target, property, value, receiver });
-
             target[property] = value;
 
             if (!!this.onGeneratedHandshake)
@@ -45,12 +37,18 @@ class Peer {
         }
     });
 
+    /** Write logging to the console */
+    private logToConsole: boolean;
+
+    // Public properties
+
     /**
      * STUN/TURN servers to use for ICE candidate negotiation
      *   - Initially set to a copy of the default server list, but can be overriden
      */
     public iceServers: Array<ISTUNServerDefinition> = stunServers.filter(() => true);
 
+    /** Called when a new handshake is generated */
     public onGeneratedHandshake: (handshakesAvailable: Array<string>) => void;
 
     /** The browser peer connection object */
@@ -61,20 +59,8 @@ class Peer {
 
     // Private methods
 
-    private GenerateRemoteHandshake({ description, iceCandidate }: IRemoteHandshake): void {
-        // Log the parameters
-        this.WriteLog(`Handshake generation`, { connection: this.connectionId, description, iceCandidate });
-
-        const handshake = JSON.stringify({ fromId: this.connectionId, description, iceCandidate });
-
-        // Add to the list of handshakes to use
-        this.generatedHandshakes.push(handshake);
-    }
-
-    // Public methods
-
     /** Initialize the RTCPeerConnection object, and assign existing data channels */
-    public GenerateConnection(): void {
+    private CreatePeerConnection(): void {
         // Set the configuration to the assigned ICE servers
         const configuration: RTCConfiguration = !!this.iceServers ? { iceServers: this.iceServers } : null;
 
@@ -100,17 +86,36 @@ class Peer {
         this.WriteWarning(`Pre-defined data channels need to be added`);
     }
 
-    public async GenerateOffer(): Promise<void> {
+    /** Create a new handshake object from either an RTCSessionDescriptionInit or RTCIceCandidate */
+    private GenerateRemoteHandshake({ description, iceCandidate }: IRemoteHandshake): void {
+        // Log the parameters
+        this.WriteLog(`Handshake generation`, { connection: this.connectionId, description, iceCandidate });
+
+        const handshake = JSON.stringify({ fromId: this.connectionId, description, iceCandidate });
+
+        // Add to the list of handshakes to use
+        this.generatedHandshakes.push(handshake);
+    }
+
+    /**
+     * Generate an offer for RTC connections
+     *   - Must be responded to with an **Answer** created by the other endpoint, and in response to this offer
+     */
+    private async GenerateOffer(): Promise<void> {
         try {
             const offer = await this.peerConnection.createOffer();
             this.WriteLog(`Offer created`, offer);
-            await this.GenerateDescription(offer);
+            await this.SetDescription(offer);
         } catch (err) {
             this.WriteError(err, `Creating Offer`);
         }
     }
 
-    public async GenerateDescription(description: RTCSessionDescriptionInit): Promise<void> {
+    /**
+     * Set the current local description, and pass that to handshake
+     * @param description - The description generated from an offer, an answer, or an ice candidate
+     */
+    private async SetDescription(description: RTCSessionDescriptionInit): Promise<void> {
         try {
             await this.peerConnection.setLocalDescription(description);
             this.WriteLog(`setLocalDescription`, this.peerConnection.localDescription);
@@ -121,9 +126,14 @@ class Peer {
         }
     }
 
-    /** Called by the peer initiating the connection process */
+    // Public methods
+
+    /**
+     * Start a new connection process
+     *   - Called by only the initiating browser, not both sides
+     */
     public async InitiateConnection(): Promise<void> {
-        this.GenerateConnection();
+        this.CreatePeerConnection();
 
         await this.GenerateOffer();
     }

@@ -1,5 +1,6 @@
 import { Peer } from "./peer.js";
 
+/** Does the browser support RTC? */
 function supportsRTC(): boolean {
     // Check for WebRTC support before proceeding
     if (!!window.RTCPeerConnection) {
@@ -14,6 +15,7 @@ function supportsRTC(): boolean {
     return false;
 }
 
+/** Start the process of configuring an RTC session */
 function initiateRtcConnection(): Peer {
     if (supportsRTC()) {
         const connectToPeer: Peer = new Peer();
