@@ -16,6 +16,8 @@ class Peer {
 
         // Add a placeholder for the onstatechanged event of the peer connection
         this.peerConnection_onStateChanged = () => { this.WriteLog(`onStateChanged for the peer connection hasn't been defined`); };
+
+        this.WriteLog(`Peer connection created`, this.connectionId);
     }
 
     // Private properties
@@ -23,7 +25,7 @@ class Peer {
     /** Unique ID for this connection */
     public connectionId: string = uuid();
 
-    private dataChannels: Map<string, DataChannel> = new Map();
+    public dataChannel: DataChannel;
 
     /** Internal list of generated handshakes */
     public generatedHandshakes: Array<string> = new Proxy([], {
@@ -86,8 +88,7 @@ class Peer {
             this.peerConnection_onStateChanged(connectionStateChangeEvent);
         };
 
-        // ADD PRE-DEFINED DATA CHANNELS
-        this.AddDataChannel(`default`);
+        this.dataChannel = new DataChannel(this);
     }
 
     /**
@@ -148,12 +149,6 @@ class Peer {
     }
 
     // Public methods
-
-    public AddDataChannel(name: string): void {
-        const channel = new DataChannel(this, name);
-
-        this.dataChannels.set(name, channel);
-    }
 
     public async ConsumeHandshake(rawHandshake: string): Promise<void> {
         const handshake: IRemoteHandshake = JSON.parse(rawHandshake);
