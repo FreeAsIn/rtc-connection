@@ -1,10 +1,3 @@
-import { HookUI } from "./ui-interaction.js";
-import { ConfigurePeer, ConsumeRemoteHandshake, SendChatMessage, StartConnection } from "./peer-interaction.js";
+import { UINegotiatedPeer } from "./uiNegotiatedPeer.js";
 
-function startApp() {
-    HookUI({ StartConnection, ConsumeRemoteHandshake, SendChatMessage });
-
-    ConfigurePeer();
-}
-
-startApp();
+const peer = new UINegotiatedPeer();

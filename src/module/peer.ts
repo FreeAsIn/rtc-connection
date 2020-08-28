@@ -5,6 +5,8 @@ import { IPeerConstructor, IRemoteHandshake, ISTUNServerDefinition } from "./int
 import { defaultServers as stunServers } from "./defaultSTUN";
 import { DataChannel } from "./dataChannel";
 
+import { ArrayUpdateProxy } from "./arrayUpdates";
+
 /** Manages a WebRTC peer connection */
 class Peer {
     /**
@@ -17,6 +19,8 @@ class Peer {
 
         // Check for RTC Support at instantiation
         if (this.RTCSupported()) {
+            this.CreatePeerConnection();
+
             // Add a placeholder for the onstatechanged event of the peer connection
             this.peerConnection_onStateChanged = () => { this.WriteLog(`onStateChanged for the peer connection hasn't been defined`); };
 
@@ -34,20 +38,7 @@ class Peer {
     public dataChannel: DataChannel;
 
     /** Internal list of generated handshakes */
-    public readonly generatedHandshakes: Array<string> = new Proxy([], {
-        get: (target, property) => {
-            return target[property];
-        },
-        set: (target, property, value, receiver) => {
-            target[property] = value;
-
-            // Run handler after length change as array length is updated after addition of element
-            if ((property == `length`) && !!this.onGeneratedHandshake)
-                this.onGeneratedHandshake();
-
-            return true;
-        }
-    });
+    public readonly generatedHandshakes: Array<string> = ArrayUpdateProxy(() => { if (!!this.onGeneratedHandshake) this.onGeneratedHandshake(); });
 
     /** Write logging to the console */
     private logToConsole: boolean;
@@ -58,7 +49,7 @@ class Peer {
      * STUN/TURN servers to use for ICE candidate negotiation
      *   - Initially set to a copy of the default server list, but can be overriden
      */
-    public iceServers: Array<ISTUNServerDefinition> = stunServers.filter(() => true);
+    public iceServers: Array<ISTUNServerDefinition> = ArrayUpdateProxy(this.CreatePeerConnection, stunServers.filter(() => true));
 
     /** Called when a new handshake is generated */
     public onGeneratedHandshake: () => void;
@@ -174,10 +165,6 @@ class Peer {
         if (handshake.fromId == this.connectionId)
             throw new Error(`Peer connection can't process a handshake signal from itself`);
 
-        // Create the RTCPeerConnection object if it doesn't already exist
-        if (!this.peerConnection)
-            this.CreatePeerConnection();
-
         // Descriptions and ICE candidates are handled differently
         if (!!handshake.description) {
             // Set the remote description for the connection
@@ -196,8 +183,6 @@ class Peer {
      *   - Called by only the initiating browser, not both sides
      */
     public async InitiateConnection(): Promise<void> {
-        this.CreatePeerConnection();
-
         await this.GenerateOffer();
     }
 

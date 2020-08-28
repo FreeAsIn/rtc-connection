@@ -90,9 +90,9 @@ function processRemoteHandshake({ ConsumeRemoteHandshake }) {
 }
 
 /** Display the next locally-generated negotiation value in the UI */
-function showNextHandshake({ currentlyProcessingHandshake, generatedHandshakes }) {
-    if (!currentlyProcessingHandshake && (generatedHandshakes.length > 0)) {
-        currentlyProcessingHandshake = true;
+function showNextHandshake({ runState, generatedHandshakes }) {
+    if (!runState.currentlyProcessingHandshake && (generatedHandshakes.length > 0)) {
+        runState.currentlyProcessingHandshake = true;
 
         divHandshake.classList.remove(`inactive`);
 
@@ -105,8 +105,6 @@ function showNextHandshake({ currentlyProcessingHandshake, generatedHandshakes }
         document.execCommand(`copy`);
         txtOutgoingHandshake.disabled = true;
     }
-
-    return currentlyProcessingHandshake;
 }
 
 export {
