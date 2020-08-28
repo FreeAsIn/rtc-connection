@@ -6,6 +6,8 @@ interface IPeerConstructor {
 }
 
 interface IRemoteHandshake {
+    /** UUID of the generating peer */
+    fromId?: string;
     /** The offer or answer generated */
     description?: RTCSessionDescriptionInit;
     /** The next ICE candidate */
