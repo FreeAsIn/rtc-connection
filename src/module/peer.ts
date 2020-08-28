@@ -10,14 +10,20 @@ class Peer {
     /**
      * Initialize the connection object
      * @param options - Initialzation options
+     * @throws If RTC support is not found
      */
     constructor({ logToConsole }: IPeerConstructor = {}) {
         this.logToConsole = logToConsole || true;
 
-        // Add a placeholder for the onstatechanged event of the peer connection
-        this.peerConnection_onStateChanged = () => { this.WriteLog(`onStateChanged for the peer connection hasn't been defined`); };
+        // Check for RTC Support at instantiation
+        if (this.RTCSupported()) {
+            // Add a placeholder for the onstatechanged event of the peer connection
+            this.peerConnection_onStateChanged = () => { this.WriteLog(`onStateChanged for the peer connection hasn't been defined`); };
 
-        this.WriteLog(`Peer connection created`, this.connectionId);
+            this.WriteLog(`Peer connection created`, this.connectionId);
+        } else
+            // If RTC is not supported, throw an error
+            throw new Error(`WebRTC is not supported`);
     }
 
     // Private properties
@@ -28,7 +34,7 @@ class Peer {
     public dataChannel: DataChannel;
 
     /** Internal list of generated handshakes */
-    public generatedHandshakes: Array<string> = new Proxy([], {
+    public readonly generatedHandshakes: Array<string> = new Proxy([], {
         get: (target, property) => {
             return target[property];
         },
@@ -146,6 +152,17 @@ class Peer {
         } catch (err) {
             this.WriteError(err, `setting local description`);
         }
+    }
+
+    /** Does the browser support RTC? */
+    private RTCSupported(): boolean {
+        if (!!window.RTCPeerConnection) {
+            this.WriteLog(`WebRTC SUPPORTED`);
+
+            return true;
+        }
+
+        return false;
     }
 
     // Public methods

@@ -2,7 +2,8 @@
   "name": "@freeasin/rtc-connect",
   "version": "0.1.0",
   "description": "Initiate and manage RTC connections",
-  "main": "index.js",
+  "main": "dist/peer.js",
+  "types": "dist/peer.d.ts",
   "scripts": {
     "prebuild": "rm ./dist/*.*",
     "build": "tsc",

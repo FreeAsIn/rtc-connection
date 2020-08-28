@@ -37,7 +37,13 @@ function displayMessage(messageText, fromRemote = false) {
     divChatHistory.appendChild(elRow);
 }
 
-/** Wire up the UI */
+/**
+ * Wire up the UI elements
+ * @param {*} options
+ * @param {Function} options.StartConnection - Called when a host wants to create an RTC offer
+ * @param {Function} options.ConsumeRemoteHandshake - Called for any connection negotiation (offer/answer/ice candidate) processing
+ * @param {Function} options.SendChatMessage - Called when sending data through to the remote host
+ */
 function hookUI({ StartConnection, ConsumeRemoteHandshake, SendChatMessage }) {
     btnGenerateOffer.addEventListener(`click`, StartConnection, false);
 
@@ -59,7 +65,7 @@ function messageFromRemote(channel, evt) {
 }
 
 /**
- * Send a message via the data channel for the chat UI
+ * Send a message to the remote host, and display that message locally
  */
 function outboundChatMessage({ SendChatMessage }) {
     let text = (txtChatEntry.value || ``).trim();
@@ -74,6 +80,7 @@ function outboundChatMessage({ SendChatMessage }) {
     }
 }
 
+/** Read, and process, a remote-host-generated negotiation, and clean up the UI */
 function processRemoteHandshake({ ConsumeRemoteHandshake }) {
     const rawHandshake = (txtIncomingHandshake.value || ``).trim();
     ConsumeRemoteHandshake({ rawHandshake });
@@ -82,6 +89,7 @@ function processRemoteHandshake({ ConsumeRemoteHandshake }) {
     txtIncomingHandshake.value = null;
 }
 
+/** Display the next locally-generated negotiation value in the UI */
 function showNextHandshake({ currentlyProcessingHandshake, generatedHandshakes }) {
     if (!currentlyProcessingHandshake && (generatedHandshakes.length > 0)) {
         currentlyProcessingHandshake = true;
