@@ -66,7 +66,7 @@ class DataChannel {
 
 class OutboundChannel {
     constructor(peer: Peer, public readonly channelName = `default`) {
-        this.dataChannel = peer.peerConnection.createDataChannel(`${channelName}-channel:${peer.connectionId}`);
+        this.dataChannel = peer.peerConnection.createDataChannel(`${channelName}-channel`);
 
         this.dataChannel.onopen = (evt: Event) => {
             peer.WriteLog(`OUTBOUND DATA CHANNEL OPENED`, this.dataChannel.label);

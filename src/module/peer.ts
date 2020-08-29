@@ -35,6 +35,9 @@ class Peer {
     /** Unique ID for this connection */
     public connectionId: string = uuid();
 
+    /** Unique ID for the remote host connection */
+    public remoteId: string;
+
     public dataChannel: DataChannel;
 
     /** Internal list of generated handshakes */
@@ -131,6 +134,19 @@ class Peer {
     }
 
     /**
+     * Check for a handshake message source that is not the expected host
+     * @param handshake - Current handshake message to check
+     */
+    private InvalidSourceCheck(handshake: IRemoteHandshake): void {
+        if (this.remoteId !== handshake.fromId) {
+            // Error on invalid message source
+            const err = new Error(`From ID "${handshake.fromId}" does not match connection remote ID (${this.remoteId})`);
+            err.name = `INVALID HANDSHAKE SOURCE`;
+            throw err;
+        }
+    }
+
+    /**
      * Set the current local description, and pass that to handshake
      * @param description - The description generated from an offer, an answer, or an ice candidate
      */
@@ -167,15 +183,24 @@ class Peer {
 
         // Descriptions and ICE candidates are handled differently
         if (!!handshake.description) {
+            // Confirm the ID source of the message
+            if (!this.remoteId)
+                this.remoteId = handshake.fromId;
+            else
+                this.InvalidSourceCheck(handshake);
+
             // Set the remote description for the connection
             await this.peerConnection.setRemoteDescription(new RTCSessionDescription(handshake.description));
 
             // Create an answer to respond to an offer
             if (handshake.description.type == `offer`)
                 await this.GenerateAnswer();
-        } else if (!!handshake.iceCandidate)
+        } else if (!!handshake.iceCandidate) {
+            this.InvalidSourceCheck(handshake);
+
             // Add the ICE Candidate to the connection
             await this.peerConnection.addIceCandidate(new RTCIceCandidate(handshake.iceCandidate));
+        }
     }
 
     /**
