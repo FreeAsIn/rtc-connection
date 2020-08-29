@@ -1,8 +1,8 @@
-import { Peer } from "./peer";
-
 interface IPeerConstructor {
     /** Show logging on the console */
     logToConsole?: boolean;
+    /** Name for the default outbound data channel */
+    defaultDataChannel?: string;
 }
 
 interface IRemoteHandshake {

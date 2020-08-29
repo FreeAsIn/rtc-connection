@@ -5,7 +5,7 @@ class DataChannel {
     /**
      * @param peer - a reference to the peer object using this data channel
      */
-    constructor(private readonly peer: Peer, public readonly defaultChannelName = `default`) {
+    constructor(private readonly peer: Peer, public readonly defaultChannelName) {
         // Default handlers do nothing
         this.onInboundMessage = (channel, evt) => { this.peer.WriteError(new Error(`Inbound message received: No onInboundMessage handler defined for data channel`), null, evt); };
 
@@ -50,7 +50,17 @@ class DataChannel {
 
     /** Add a new outbound channel for communicating to the remote peer */
     public AddOutboundChannel(channelName: string): void {
-        this.outbound.set(channelName, new OutboundChannel(this.peer, channelName));
+        // Check for the existence of a channel with that name
+        const existingName = Array.from(this.outbound.keys()).find(key => (key == channelName));
+
+        if (!!existingName) {
+            const err = new Error();
+            err.name = `Duplicate Channel`;
+            err.message = `A data channel named "${channelName}" already exists`;
+            throw err;
+        }
+        else
+            this.outbound.set(channelName, new OutboundChannel(this.peer, channelName));
     }
 
     /**

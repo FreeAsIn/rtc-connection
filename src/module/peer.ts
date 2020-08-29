@@ -14,8 +14,9 @@ class Peer {
      * @param options - Initialzation options
      * @throws If RTC support is not found
      */
-    constructor({ logToConsole }: IPeerConstructor = {}) {
+    constructor({ logToConsole, defaultDataChannel }: IPeerConstructor = {}) {
         this.logToConsole = logToConsole || true;
+        this.defaultDataChannelName = defaultDataChannel || `default`;
 
         // Check for RTC Support at instantiation
         if (this.RTCSupported()) {
@@ -45,6 +46,9 @@ class Peer {
 
     /** Write logging to the console */
     private logToConsole: boolean;
+
+    /** Name to pass when (re)instantiating the initial data channel */
+    private defaultDataChannelName: string;
 
     // Public properties
 
@@ -88,7 +92,7 @@ class Peer {
             this.peerConnection_onStateChanged(connectionStateChangeEvent);
         };
 
-        this.dataChannel = new DataChannel(this);
+        this.dataChannel = new DataChannel(this, this.defaultDataChannelName);
     }
 
     /**
