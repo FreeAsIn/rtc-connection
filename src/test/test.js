@@ -1,3 +1,10 @@
 import { UINegotiatedPeer } from "./uiNegotiatedPeer.js";
 
-const peer = new UINegotiatedPeer();
+async function startRTC() {
+    const peer = new UINegotiatedPeer();
+}
+
+startRTC()
+    .catch(err => {
+        console.error(`FATAL ERROR`, err);
+    });

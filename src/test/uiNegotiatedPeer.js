@@ -7,8 +7,13 @@ const _runState = new WeakMap();
 /** A Peer Connection Manager designed to negotiate the connection via manually sending handshakes */
 class UINegotiatedPeer extends Peer {
     constructor() {
-        super();
+        // Instantiate with the default data channel named "message"
+        super({ defaultDataChannel: `message` });
 
+        // Add a second data channel called "typing-status"
+        this.dataChannel.AddOutboundChannel(`typing-status`);
+
+        // Track the handshake negotiation on the remote side
         _runState.set(this, { currentlyProcessingHandshake: false });
 
         // Handle newly created handshake values
@@ -23,7 +28,7 @@ class UINegotiatedPeer extends Peer {
         this.dataChannel.onInboundMessage = RemoteMessageHandler;
 
         // When the outbound channel is opened for this connection
-        this.dataChannel.outbound.get(`default`).onOpen = (evt) => {
+        this.dataChannel.outbound.get(`message`).onOpen = (evt) => {
             const channel = evt.target;
 
             if (channel.readyState == `open`) {
@@ -39,7 +44,8 @@ class UINegotiatedPeer extends Peer {
         HookUI({
             StartConnection: () => this.StartConnectionProcess(),
             ConsumeRemoteHandshake: params => this.ConsumeRemoteHandshake(params),
-            SendChatMessage: text => this.dataChannel.Send(text),
+            SendChatMessage: text => this.dataChannel.Send(text, `message`),
+            SendTypingStatus: status => this.dataChannel.Send(status, `typing-status`),
         });
     }
 

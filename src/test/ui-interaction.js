@@ -6,6 +6,7 @@ const
     divChatHistory = document.querySelector(`.chat div.history`),
     divConnectionNegotiation = document.querySelector(`div.page_container.negotiator`),
     divHandshake = document.querySelector(`div.send_handshake`),
+    spanRemoteStatus = document.querySelector(`span.remote_status`),
     txtChatEntry = document.querySelector(`textarea.chat_entry`),
     txtOutgoingHandshake = divHandshake.querySelector(`textarea`),
     txtIncomingHandshake = document.querySelector(`textarea.remote_negotiation`);
@@ -44,16 +45,49 @@ function displayMessage(messageText, fromRemote = false) {
  * @param {Function} options.ConsumeRemoteHandshake - Called for any connection negotiation (offer/answer/ice candidate) processing
  * @param {Function} options.SendChatMessage - Called when sending data through to the remote host
  */
-function hookUI({ StartConnection, ConsumeRemoteHandshake, SendChatMessage }) {
+function hookUI({ StartConnection, ConsumeRemoteHandshake, SendChatMessage, SendTypingStatus }) {
+    // Clicking Generate offer starts the RTC negotiation process
     btnGenerateOffer.addEventListener(`click`, StartConnection, false);
 
+    // Clicking consume offer consumes offer/answer/ice candidate
     btnConsumeOffer.addEventListener(`click`, () => processRemoteHandshake({ ConsumeRemoteHandshake }), false);
-    // Consume a handshake on press of the enter key
+    // Consume on press of the enter key as well
     txtIncomingHandshake.addEventListener(`keydown`, (evt) => { if (evt.keyCode == 13) processRemoteHandshake({ ConsumeRemoteHandshake }); }, false);
 
+    // Click to send a chat message
     btnSendChat.addEventListener(`click`, () => outboundChatMessage({ SendChatMessage }), false);
-    // Send a chat on enter key
+    // Send a chat on enter key as well
     txtChatEntry.addEventListener(`keyup`, (evt) => { if (evt.keyCode == 13) outboundChatMessage({ SendChatMessage }); }, false);
+    // Track active typing into the chat box
+    txtChatEntry.addEventListener(`input`, () => activeTypingInChatBox(), false);
+
+    // Use a proxy to trigger the status update so that SendTypingStatus isn't passed in multiple places
+    _typingStatus = new Proxy({ status: false}, {
+        get: (target, property) => {
+            return target[property];
+        },
+        set: (target, property, value) => {
+            if (property == `status`)
+                SendTypingStatus(value);
+
+            target[property] = value;
+
+            return true;
+        },
+    });
+}
+
+let _typingStatus = null,
+    _typingTimeout = null;
+
+function activeTypingInChatBox() {
+    if (!_typingStatus.status)
+        _typingStatus.status = true;
+
+    clearTimeout(_typingTimeout);
+    _typingTimeout = setTimeout(() => {
+        _typingStatus.status = false;
+    }, 1500);
 }
 
 /**
@@ -61,7 +95,17 @@ function hookUI({ StartConnection, ConsumeRemoteHandshake, SendChatMessage }) {
  * @param {MessageEvent} evt
  */
 function messageFromRemote(channel, evt) {
-    displayMessage(evt.data, true);
+    switch (channel.label) {
+        case `typing-status`:
+            if (evt.data == `true`)
+                spanRemoteStatus.classList.remove(`inactive`);
+            else
+                spanRemoteStatus.classList.add(`inactive`);
+            break;
+
+        default:
+            displayMessage(evt.data, true);
+    }
 }
 
 /**
@@ -73,6 +117,9 @@ function outboundChatMessage({ SendChatMessage }) {
     if (text.length > 0) {
         // Reset the chat entry
         txtChatEntry.value = ``;
+
+        // Reset the typing status
+        _typingStatus.status = false;
 
         SendChatMessage(text);
 
