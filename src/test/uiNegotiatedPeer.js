@@ -66,12 +66,19 @@ class UINegotiatedPeer extends Peer {
         if (rawHandshake.length > 0) {
             _runState.get(this).currentlyProcessingHandshake = false;
 
-            await this.ConsumeHandshake(rawHandshake);
+            try {
+                await this.ConsumeHandshake(rawHandshake);
 
-            this.ui.ShowNextHandshake({
-                runState: _runState.get(this),
-                generatedHandshakes: this.generatedHandshakes,
-            });
+                this.ui.ShowNextHandshake({
+                    runState: _runState.get(this),
+                    generatedHandshakes: this.generatedHandshakes,
+                });
+            } catch (err) {
+                if (err.name == `SAME ORIGIN HANDSHAKE`)
+                    alert(err.message);
+                else
+                    throw err;
+            }
         }
     }
 
