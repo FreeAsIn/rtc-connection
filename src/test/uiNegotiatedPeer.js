@@ -1,14 +1,26 @@
 import { Peer } from "./module/peer.js";
-import { ActivateMessaging, HookUI, RemoteMessageHandler, ShowNextHandshake } from "./ui-interaction.js";
+import { PeerConnectionUI } from "./ui-interaction.js";
 
 /** Is a handshake from this host currently being processed by the remote */
-const _runState = new WeakMap();
+const _runState = new WeakMap(),
+    _ui = new WeakMap();
 
 /** A Peer Connection Manager designed to negotiate the connection via manually sending handshakes */
 class UINegotiatedPeer extends Peer {
     constructor() {
         // Instantiate with the default data channel named "message"
         super({ defaultDataChannel: `message` });
+
+        // Add the UI for this connection
+        _ui.set(
+            this,
+            new PeerConnectionUI({
+                StartConnection: () => this.StartConnectionProcess(),
+                ConsumeRemoteHandshake: params => this.ConsumeRemoteHandshake(params),
+                SendChatMessage: text => this.dataChannel.Send(text, `message`),
+                SendTypingStatus: status => this.dataChannel.Send(status, `typing-status`),
+            })
+        );
 
         // Add a second data channel called "typing-status"
         this.dataChannel.AddOutboundChannel(`typing-status`);
@@ -18,14 +30,14 @@ class UINegotiatedPeer extends Peer {
 
         // Handle newly created handshake values
         this.onGeneratedHandshake = () => {
-            ShowNextHandshake({
+            this.ui.ShowNextHandshake({
                 runState: _runState.get(this),
                 generatedHandshakes: this.generatedHandshakes,
             });
         };
 
         // Respond to Inbound messages
-        this.dataChannel.onInboundMessage = RemoteMessageHandler;
+        this.dataChannel.onInboundMessage = (channel, evt) => this.ui.RemoteMessageHandler(channel, evt);
 
         // When the outbound channel is opened for this connection
         this.dataChannel.outbound.get(`message`).onOpen = (evt) => {
@@ -36,18 +48,12 @@ class UINegotiatedPeer extends Peer {
                 this.generatedHandshakes.splice(0, this.generatedHandshakes.length);
 
                 // Display the chat UI
-                ActivateMessaging();
+                this.ui.ActivateMessaging();
             }
         };
-
-        // Attach handlers to the UI
-        HookUI({
-            StartConnection: () => this.StartConnectionProcess(),
-            ConsumeRemoteHandshake: params => this.ConsumeRemoteHandshake(params),
-            SendChatMessage: text => this.dataChannel.Send(text, `message`),
-            SendTypingStatus: status => this.dataChannel.Send(status, `typing-status`),
-        });
     }
+
+    get ui() { return _ui.get(this); }
 
     /*
      * --------------------------------------------------------------
@@ -62,7 +68,7 @@ class UINegotiatedPeer extends Peer {
 
             await this.ConsumeHandshake(rawHandshake);
 
-            ShowNextHandshake({
+            this.ui.ShowNextHandshake({
                 runState: _runState.get(this),
                 generatedHandshakes: this.generatedHandshakes,
             });
