@@ -1,4 +1,5 @@
 import { OutboundChannel } from "./outboundChannel";
+import { InboundChannel } from "./inboundChannel";
 /** RTC Data Channel */
 class DataChannel {
     /**
@@ -8,30 +9,30 @@ class DataChannel {
         this.peer = peer;
         this.defaultChannelName = defaultChannelName;
         /** Incoming data channels */
-        this.inbound = [];
+        this.inbound = new Map();
         /** Data channels for outgoing messages */
         this.outbound = new Map();
-        // Default handlers do nothing
-        this.onInboundMessage = (channel, evt) => { this.peer.WriteError(new Error(`Inbound message received: No onInboundMessage handler defined for data channel`), null, evt); };
         // Register an inbound data channel handler via an anonymous function (to keep "this" scope to the class)
         this.peer.peerConnection.ondatachannel = (evt) => { this.addInboundChannel(evt); };
         // Add the default channel
         this.AddOutboundChannel(defaultChannelName);
     }
     addInboundChannel(evt) {
-        let channel = evt.channel;
-        this.inbound.push(channel);
+        const channel = evt.channel;
         this.peer.WriteLog(`NEW INCOMING DATA CHANNEL FOR ${this.peer.connectionId}`, channel.label, channel);
-        channel.onmessage = (evt) => {
-            this.peer.WriteLog(`MESSAGE RECEIVED`, this.peer.connectionId, channel.label, evt);
-            this.onInboundMessage(channel, evt);
+        if (!this.inbound.has(channel.label))
+            this.inbound.set(channel.label, new InboundChannel(this.peer));
+        // Add the channel
+        this.inbound.get(channel.label).AddChannel(channel);
+        // Clean up
+        this.inbound.get(channel.label).onClose = () => {
+            this.inbound.delete(channel.label);
         };
-        channel.onclose = (evt) => {
-            // Remove the channel from the array
-            this.inbound.splice(this.inbound.findIndex(c => (c.id == channel.id)), 1);
-            this.peer.WriteLog(`INCOMING DATA CHANNEL CLOSED`, this.peer.connectionId, channel);
-            channel = null;
-        };
+    }
+    AddInboundMessageHandler(channelName, handler) {
+        if (!this.inbound.has(channelName))
+            this.inbound.set(channelName, new InboundChannel(this.peer));
+        this.inbound.get(channelName).onInboundMessage = evt => handler(evt);
     }
     /** Add a new outbound channel for communicating to the remote peer */
     AddOutboundChannel(channelName) {

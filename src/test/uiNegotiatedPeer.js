@@ -28,7 +28,8 @@ class UINegotiatedPeer extends Peer {
         this.onGeneratedHandshake = handshake => this.ui.ShowNextHandshake(handshake);
 
         // Respond to Inbound messages
-        this.dataChannel.onInboundMessage = (channel, evt) => this.ui.RemoteMessageHandler(channel, evt);
+        this.dataChannel.AddInboundMessageHandler(`typing-status`, evt => this.ui.TypingStatusUpdate(evt));
+        this.dataChannel.AddInboundMessageHandler(`message`, evt => this.ui.TextMessageReceived(evt));
 
         // When the outbound channel is opened for this connection
         this.dataChannel.outbound.get(`message`).onOpen = (evt) => {

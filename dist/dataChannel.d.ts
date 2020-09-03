@@ -3,18 +3,17 @@ import { OutboundChannel } from "./outboundChannel";
 /** RTC Data Channel */
 declare class DataChannel {
     private readonly peer;
-    readonly defaultChannelName: any;
+    readonly defaultChannelName: string;
     /**
      * @param peer - a reference to the peer object using this data channel
      */
-    constructor(peer: Peer, defaultChannelName: any);
+    constructor(peer: Peer, defaultChannelName: string);
     /** Incoming data channels */
-    inbound: Array<RTCDataChannel>;
-    /** Handler called for inbound message */
-    onInboundMessage: (channel: RTCDataChannel, evt: MessageEvent) => void;
+    private inbound;
     /** Data channels for outgoing messages */
     outbound: Map<string, OutboundChannel>;
     private addInboundChannel;
+    AddInboundMessageHandler(channelName: string, handler: (evt: MessageEvent) => void): void;
     /** Add a new outbound channel for communicating to the remote peer */
     AddOutboundChannel(channelName: string): void;
     /**

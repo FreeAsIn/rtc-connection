@@ -128,23 +128,24 @@ class PeerConnectionUI {
     }
 
     /**
-     * Handle incoming messages
+     * Update the typing status indicator
      * @param {MessageEvent} evt
      */
-    RemoteMessageHandler(channel, evt) {
+    TypingStatusUpdate(evt) {
         const { spanRemoteStatus } = this.elements;
 
-        switch (channel.label) {
-            case `typing-status`:
-                if (evt.data == `true`)
-                    spanRemoteStatus.classList.remove(`inactive`);
-                else
-                    spanRemoteStatus.classList.add(`inactive`);
-                break;
+        if (evt.data == `true`)
+            spanRemoteStatus.classList.remove(`inactive`);
+        else
+            spanRemoteStatus.classList.add(`inactive`);
+    }
 
-            default:
-                this._displayMessage(evt.data, true);
-        }
+    /**
+     * Display a new received message
+     * @param {MessageEvent} evt
+     */
+    TextMessageReceived(evt) {
+        this._displayMessage(evt.data, true);
     }
 
 
