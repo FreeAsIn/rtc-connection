@@ -149,23 +149,19 @@ class PeerConnectionUI {
 
 
     /** Display the next locally-generated negotiation value in the UI */
-    ShowNextHandshake({ runState, generatedHandshakes }) {
+    ShowNextHandshake(nextHandshake) {
         const { divHandshake, txtOutgoingHandshake } = this.elements;
 
-        if (!runState.currentlyProcessingHandshake && (generatedHandshakes.length > 0)) {
-            runState.currentlyProcessingHandshake = true;
+        divHandshake.classList.remove(`inactive`);
 
-            divHandshake.classList.remove(`inactive`);
+        txtOutgoingHandshake.value = nextHandshake;
 
-            txtOutgoingHandshake.value = generatedHandshakes.shift();
-
-            // Enable the textbox just long enough to copy the text, and then disable again
-            txtOutgoingHandshake.disabled = false;
-            txtOutgoingHandshake.focus();
-            txtOutgoingHandshake.select();
-            document.execCommand(`copy`);
-            txtOutgoingHandshake.disabled = true;
-        }
+        // Enable the textbox just long enough to copy the text, and then disable again
+        txtOutgoingHandshake.disabled = false;
+        txtOutgoingHandshake.focus();
+        txtOutgoingHandshake.select();
+        document.execCommand(`copy`);
+        txtOutgoingHandshake.disabled = true;
     }
 }
 

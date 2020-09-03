@@ -13,8 +13,8 @@ declare class Peer {
     /** Unique ID for the remote host connection */
     remoteId: string;
     dataChannel: DataChannel;
-    /** Internal list of generated handshakes */
-    readonly generatedHandshakes: Array<string>;
+    /** Internal list of generated ICE candidates to signal */
+    readonly generatedICECandidates: Array<string>;
     /** Write logging to the console */
     private logToConsole;
     /** Name to pass when (re)instantiating the initial data channel */
@@ -25,7 +25,7 @@ declare class Peer {
      */
     iceServers: Array<ISTUNServerDefinition>;
     /** Called when a new handshake is generated */
-    onGeneratedHandshake: () => void;
+    onGeneratedHandshake: (nextHandshake: string) => void;
     /** The browser peer connection object */
     peerConnection: RTCPeerConnection;
     /** Expose the peer connection's onstatechanged event */
