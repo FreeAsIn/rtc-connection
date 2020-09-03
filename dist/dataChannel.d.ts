@@ -1,4 +1,5 @@
 import { Peer } from "./peer";
+import { OutboundChannel } from "./outboundChannel";
 /** RTC Data Channel */
 declare class DataChannel {
     private readonly peer;
@@ -23,13 +24,5 @@ declare class DataChannel {
      *   - Defaults to the default channel name assigned in the constructor
      */
     Send(dataToSend: any, channelName?: string): void;
-}
-declare class OutboundChannel {
-    readonly channelName: string;
-    constructor(peer: Peer, channelName?: string);
-    private dataChannel;
-    onOpen: (evt: Event) => void;
-    onClose: (evt: Event) => void;
-    Send(dataToSend: any): void;
 }
 export { DataChannel, };
