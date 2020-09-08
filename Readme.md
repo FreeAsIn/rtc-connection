@@ -50,3 +50,9 @@ npm run test
 **Try the same example in two different browser tabs instead of two connections on one page**
 
 **This also works over different devices locally, or over the Internet, as long as you can exchange the handshake signaling data**
+
+## License
+
+MIT
+
+See [LICENSE](./LICENSE) for further details.

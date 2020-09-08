@@ -2,6 +2,10 @@
   "name": "@freeasin/rtc-connect",
   "version": "0.1.0",
   "description": "Initiate and manage RTC connections",
+  "repository": {
+    "type": "git",
+    "url": "github:freeasin/rtc-connection"
+  },
   "main": "dist/peer.js",
   "types": "dist/peer.d.ts",
   "scripts": {
