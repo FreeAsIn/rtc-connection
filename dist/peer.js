@@ -22,7 +22,7 @@ class Peer {
          *   - Initially set to a copy of the default server list, but can be overriden
          */
         this.iceServers = ArrayUpdateProxy(this.CreatePeerConnection, stunServers.filter(() => true));
-        this.logToConsole = logToConsole || true;
+        this.logToConsole = logToConsole !== null && logToConsole !== void 0 ? logToConsole : true;
         this.defaultDataChannelName = defaultDataChannel || `default`;
         // Check for RTC Support at instantiation
         if (this.RTCSupported()) {

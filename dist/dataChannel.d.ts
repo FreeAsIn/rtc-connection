@@ -12,7 +12,14 @@ declare class DataChannel {
     private inbound;
     /** Data channels for outgoing messages */
     outbound: Map<string, OutboundChannel>;
+    /** Handler for the ondatachannel event of an RTCPeerConnection */
     private addInboundChannel;
+    /**
+     * Add a handler for a channel
+     *   - *Channel may not exist yet*
+     * @param channelName - Label used by the channel
+     * @param handler
+     */
     AddInboundMessageHandler(channelName: string, handler: (evt: MessageEvent) => void): void;
     /** Add a new outbound channel for communicating to the remote peer */
     AddOutboundChannel(channelName: string): void;

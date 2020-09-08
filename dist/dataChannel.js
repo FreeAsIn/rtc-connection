@@ -17,18 +17,25 @@ class DataChannel {
         // Add the default channel
         this.AddOutboundChannel(defaultChannelName);
     }
+    /** Handler for the ondatachannel event of an RTCPeerConnection */
     addInboundChannel(evt) {
         const channel = evt.channel;
         this.peer.WriteLog(`NEW INCOMING DATA CHANNEL FOR ${this.peer.connectionId}`, channel.label, channel);
         if (!this.inbound.has(channel.label))
             this.inbound.set(channel.label, new InboundChannel(this.peer));
-        // Add the channel
+        // Add the channel to the InboundChannel
         this.inbound.get(channel.label).AddChannel(channel);
-        // Clean up
+        // Clean up on channel close
         this.inbound.get(channel.label).onClose = () => {
             this.inbound.delete(channel.label);
         };
     }
+    /**
+     * Add a handler for a channel
+     *   - *Channel may not exist yet*
+     * @param channelName - Label used by the channel
+     * @param handler
+     */
     AddInboundMessageHandler(channelName, handler) {
         if (!this.inbound.has(channelName))
             this.inbound.set(channelName, new InboundChannel(this.peer));

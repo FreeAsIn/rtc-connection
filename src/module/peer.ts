@@ -15,7 +15,7 @@ class Peer {
      * @throws If RTC support is not found
      */
     constructor({ logToConsole, defaultDataChannel }: IPeerConstructor = {}) {
-        this.logToConsole = logToConsole || true;
+        this.logToConsole = logToConsole ?? true;
         this.defaultDataChannelName = defaultDataChannel || `default`;
 
         // Check for RTC Support at instantiation
