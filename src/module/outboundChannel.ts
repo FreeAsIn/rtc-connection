@@ -19,10 +19,14 @@ class OutboundChannel {
 
     private dataChannel: RTCDataChannel;
 
+    // eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars, @typescript-eslint/no-empty-function
     public onOpen: (evt: Event) => void = (evt: Event) => {};
+    // eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars, @typescript-eslint/no-empty-function
     public onClose: (evt: Event) => void = (evt: Event) => {};
 
-    public Send(dataToSend: any) {
+    /** Send data to remote host */
+    // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types, @typescript-eslint/no-explicit-any
+    public Send(dataToSend: any): void {
         this.dataChannel.send(dataToSend);
     }
 }

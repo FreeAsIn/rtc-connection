@@ -31,26 +31,39 @@ class Peer {
             throw new Error(`WebRTC is not supported`);
     }
 
-    // Private properties
+    //#region Private properties
 
-    /** Unique ID for this connection */
-    public connectionId: string = uuid();
-
-    /** Unique ID for the remote host connection */
-    public remoteId: string;
-
-    public dataChannel: DataChannel;
-
-    /** Internal list of generated ICE candidates to signal */
-    public readonly generatedICECandidates: Array<string> = [];
-
-    /** Write logging to the console */
-    private logToConsole: boolean;
+    /** The assigned data channel */
+    private _dataChannel: DataChannel;
 
     /** Name to pass when (re)instantiating the initial data channel */
     private defaultDataChannelName: string;
 
-    // Public properties
+    /** Write logging to the console */
+    private logToConsole: boolean;
+
+    /** Assign the remote connection ID to a local variable */
+    private _remoteConnectionId: string;
+
+    //#endregion Private properties
+
+    //#region Public accessors
+
+    /** Communication with the remote via a data channel */
+    public get dataChannel(): DataChannel { return this._dataChannel; }
+
+    /** Unique ID for the remote host connection */
+    public get remoteId(): string { return this._remoteConnectionId; }
+
+    //#endregion Public accessors
+
+    //#region Public properties
+
+    /** Unique ID for this connection */
+    public readonly connectionId: string = uuid();
+
+    /** Internal list of generated ICE candidates to signal */
+    public readonly generatedICECandidates: Array<string> = [];
 
     /**
      * STUN/TURN servers to use for ICE candidate negotiation
@@ -67,7 +80,9 @@ class Peer {
     /** Expose the peer connection's onstatechanged event */
     public peerConnection_onStateChanged: (evt: Event) => void;
 
-    // Private methods
+    //#endregion Public properties
+
+    //#region Private methods
 
     /** Initialize the RTCPeerConnection object, and assign existing data channels */
     private CreatePeerConnection(): void {
@@ -92,7 +107,7 @@ class Peer {
             this.peerConnection_onStateChanged(connectionStateChangeEvent);
         };
 
-        this.dataChannel = new DataChannel(this, this.defaultDataChannelName);
+        this._dataChannel = new DataChannel(this, this.defaultDataChannelName);
     }
 
     /**
@@ -180,7 +195,9 @@ class Peer {
         return false;
     }
 
-    // Public methods
+    //#endregion Private methods
+
+    //#region Public methods
 
     public async ConsumeHandshake(rawHandshake: string): Promise<void> {
         const handshake: IRemoteHandshake = JSON.parse(rawHandshake);
@@ -199,7 +216,7 @@ class Peer {
         if (!!handshake.description) {
             // Confirm the ID source of the message
             if (!this.remoteId)
-                this.remoteId = handshake.fromId;
+                this._remoteConnectionId = handshake.fromId;
             else
                 this.InvalidSourceCheck(handshake);
 
@@ -234,6 +251,7 @@ class Peer {
     }
 
     /** Log any parameters to the console, if logToConsole == true */
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     public WriteLog(...args: any[]): void {
         if (this.logToConsole)
             // eslint-disable-next-line no-console
@@ -241,6 +259,7 @@ class Peer {
     }
 
     /** Log any parameters as warnings */
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     public WriteWarning(...args: any[]): void {
         // eslint-disable-next-line no-console
         console.log(args);
@@ -251,6 +270,7 @@ class Peer {
      * @param err - The exception
      * @param note - Any details provided will be written with the exception
      */
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     public WriteError(err: Error, note?: string, ...args: any[]): void {
         let tag = `EXCEPTION`;
 
@@ -260,6 +280,8 @@ class Peer {
         // eslint-disable-next-line no-console
         console.error(tag, err, args);
     }
+
+    //#endregion Public methods
 }
 
 export {

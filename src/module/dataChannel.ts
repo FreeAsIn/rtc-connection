@@ -73,6 +73,7 @@ class DataChannel {
      * @param channelName - Name of the channel to use
      *   - Defaults to the default channel name assigned in the constructor
      */
+    // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types, @typescript-eslint/no-explicit-any
     public Send(dataToSend: any, channelName: string = this.defaultChannelName): void {
         this.outbound.get(channelName).Send(dataToSend);
     }
