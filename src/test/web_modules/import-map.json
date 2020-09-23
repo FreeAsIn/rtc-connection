@@ -1,0 +1,6 @@
+{
+  "imports": {
+    "@freeasin/uuid": "./@freeasin/uuid.js",
+    "socket.io-client": "./socket.io-client.js"
+  }
+}
