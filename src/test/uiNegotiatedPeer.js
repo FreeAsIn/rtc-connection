@@ -32,7 +32,6 @@ class UINegotiatedPeer extends Peer {
             this.ui.ShowNextHandshake(handshake);
         }
         socket.on('message',(payload)=>{
-            console.log({payload})
             if (payload.search(/fromId/) >= 0)
             this.ConsumeRemoteHandshake({ rawHandshake: payload });
         });
