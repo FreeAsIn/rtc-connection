@@ -10,5 +10,4 @@ module.exports = {
         open: `none`,
         out: `dist/test`
     },
-    install: [`socket.io-client`]
 };

@@ -1,1 +1,0 @@
-function n(){const e=""+1e7+-1e3+-4e3+-8e3+-1e11;return e.replace(/[018]/g,o)}function o(e){const t=+e,r=i(),a=t^r&15>>t/4;return a.toString(16)}function i(){const e=new Uint8Array(1);return crypto.randomBytes?e[0]=crypto.randomBytes(1)[0]:crypto.getRandomValues(e),e[0]}export{n as v4};

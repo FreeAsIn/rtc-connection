@@ -1,6 +1,5 @@
 import { Peer } from "./module/peer.js";
 import { PeerConnectionUI } from "./ui-interaction.js";
-import socket from "./socket.js";
 
 /** Is a handshake from this host currently being processed by the remote */
 const _ui = new WeakMap();
@@ -26,21 +25,7 @@ class UINegotiatedPeer extends Peer {
         this.dataChannel.AddOutboundChannel(`typing-status`);
 
         // Handle newly created handshake values
-        this.onGeneratedHandshake = handshake => {
-            // socket.send(handshake);
-            socket.emit('message', handshake);
-            this.ui.ShowNextHandshake(handshake);
-        }
-        socket.on('message',(payload)=>{
-            if (payload.search(/fromId/) >= 0)
-            this.ConsumeRemoteHandshake({ rawHandshake: payload });
-        });
-
-
-        // socket.onmessage = msg => {
-        //     if (msg.data.search(/fromId/) >= 0)
-        //         this.ConsumeRemoteHandshake({ rawHandshake: msg.data });
-        // };
+        this.onGeneratedHandshake = handshake => this.ui.ShowNextHandshake(handshake);
 
         // Respond to Inbound messages
         this.dataChannel.AddInboundMessageHandler(`typing-status`, evt => this.ui.TypingStatusUpdate(evt));
