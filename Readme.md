@@ -29,6 +29,7 @@ Signaling values come from `Peer.onGeneratedHandshake(handshake)`.
     + *evt.target* will be the channel
     + *channel.readyState* should be **"open"**
     + This is where the UX indicate connections between hosts now exists
+1. Use `Peer.onStateChanged(handler)` to define handlers that will be called on every state change for the peer connection
 
 ## Included Example
 

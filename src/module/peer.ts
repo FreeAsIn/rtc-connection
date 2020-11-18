@@ -22,9 +22,6 @@ class Peer {
         if (this.RTCSupported()) {
             this.CreatePeerConnection();
 
-            // Add a placeholder for the onstatechanged event of the peer connection
-            this.peerConnection_onStateChanged = () => { this.WriteLog(`onStateChanged for the peer connection hasn't been defined`); };
-
             this.WriteLog(`Peer connection created`, this.connectionId);
         } else
             // If RTC is not supported, throw an error
@@ -44,6 +41,9 @@ class Peer {
 
     /** Assign the remote connection ID to a local variable */
     private _remoteConnectionId: string;
+
+    /** Hold state change handlers for the peer connection */
+    private peerConnectionStateChangeHandlers: Array<(evt: Event) => void> = [];
 
     //#endregion Private properties
 
@@ -76,9 +76,6 @@ class Peer {
 
     /** The browser peer connection object */
     public peerConnection: RTCPeerConnection;
-
-    /** Expose the peer connection's onstatechanged event */
-    public peerConnection_onStateChanged: (evt: Event) => void;
 
     //#endregion Public properties
 
@@ -195,6 +192,15 @@ class Peer {
         return false;
     }
 
+    /** Handle the peer connection's onstatechanged event */
+    private peerConnection_onStateChanged(evt: Event): void {
+        // Warn if no event handler is defined
+        if (this.peerConnectionStateChangeHandlers.length == 0)
+            this.WriteLog(`No event handler defined for onStateChanged for the peer connection`);
+
+        this.peerConnectionStateChangeHandlers.forEach(handler => handler(evt));
+    }
+
     //#endregion Private methods
 
     //#region Public methods
@@ -248,6 +254,11 @@ class Peer {
      */
     public async InitiateConnection(): Promise<void> {
         await this.GenerateOffer();
+    }
+
+    /** Expose the peer connection's onstatechanged event */
+    public onStateChanged(stateChangeHandler: (evt: Event) => void): void {
+        this.peerConnectionStateChangeHandlers.push(stateChangeHandler);
     }
 
     /** Log any parameters to the console, if logToConsole == true */
